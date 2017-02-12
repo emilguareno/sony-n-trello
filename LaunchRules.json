@@ -9,7 +9,7 @@
         "list all boards",
         "set board to .*",
         "list cards .*",
-        "set card .*"
+        "move card .*"
       ]
     }
   ]

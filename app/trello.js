@@ -156,6 +156,55 @@ function speakCardsInList(){
     });
 }
 
+function confirmCardMoved(cardName, listName){
+    var synthesis = da.SpeechSynthesis.getInstance();
+    // API_LEVEL = 2 or later;
+    synthesis.speak('card ' + cardName + ' has been moved to ' + listName, {
+        onstart: function() {
+            console.log('[SpeechToText] speak start');
+        },
+        onend: function() {
+            console.log('[SpeechToText] speak onend');
+            da.stopSegment();
+        },
+        onerror: function(error) {
+            console.log('[SpeechToText] speak cancel: ' + error.message);
+            da.stopSegment();
+        }
+    });
+}
+
+function getCardByName(name){
+    for(var i = 0; i < lists.length; i++){
+        for(var j = 0; j < lists[i].cards.length; j++){
+            if(lists[i].cards[j].name.toLowerCase() === name.toLowerCase()){
+                return lists[i].cards[j];
+            }
+        }
+    }
+}
+
+function moveCard(){
+    var cardList = command.split('move card ')[1].split(' to list ');
+    var cardName = cardList[0];
+    var listName = cardList[1];
+    var listId = getListsByName(listName).id;
+    var cardId = getCardByName(cardName).id;
+    var deferred = jQuery.Deferred();
+    $.ajax({
+        url: 'https://api.trello.com/1/cards/'+ cardId +'?idList='+ listId +'&key=***REMOVED***&token=***REMOVED***',
+        xhr: function() { return da.getXhr(); },
+        method: 'PUT',
+        success: function(data) {
+            deferred.resolve(cardName, listName);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+
+        }
+    })
+    return deferred.promise();
+}
+
 /**
  * The callback to prepare a segment for play.
  * @param  {string} trigger The trigger type of a segment.
@@ -177,6 +226,11 @@ da.segment.onpreprocess = function(trigger, args) {
             });
             break;
         case command.indexOf('list cards') !== -1:
+            $.when(getListsFromBoard()).then(function() {
+                startSegment();
+            });
+            break;
+        case command.indexOf('move card') !== -1:
             $.when(getListsFromBoard()).then(function() {
                 startSegment();
             });
@@ -218,6 +272,11 @@ da.segment.onstart = function(trigger, args) {
             break;
         case command.indexOf('list cards') !== -1:
             speakCardsInList();
+            break;
+        case command.indexOf('move card') !== -1:
+            $.when(moveCard()).then(function(cardName, listName){
+              confirmCardMoved(cardName, listName);  
+            });
             break;
         }
     }
