@@ -25,14 +25,26 @@
 
 /*
 COMMANDS EXAMPLES
-- move card buy bus ticket to list in progress
 - list all boards
-- list cards to do
+{"args":  {"domain_goal":"OUT_OF_DOMAIN-OUT_OF_GOAL","recognitionSetString":"{\"Version\": \"1.1.3\",  \"AppPrior\": {\"DomainGoal\": null, \"AttentionDateTime\": 1486748606658}, \"SemanticAnalysisResults\": [{\"SpeechRecogResult\": \"list all boards\", \"DomainGoal\": \"OUT_OF_DOMAIN-OUT_OF_GOAL\", \"Score\": 1.0, \"SlotSets\": []}]}"}  }
+
 - set board to errands
+{"args":  {"domain_goal":"OUT_OF_DOMAIN-OUT_OF_GOAL","recognitionSetString":"{\"Version\": \"1.1.3\",  \"AppPrior\": {\"DomainGoal\": null, \"AttentionDateTime\": 1486748606658}, \"SemanticAnalysisResults\": [{\"SpeechRecogResult\": \"set board to errands\", \"DomainGoal\": \"OUT_OF_DOMAIN-OUT_OF_GOAL\", \"Score\": 1.0, \"SlotSets\": []}]}"}  }
+
+- list cards to do
+{"args":  {"domain_goal":"OUT_OF_DOMAIN-OUT_OF_GOAL","recognitionSetString":"{\"Version\": \"1.1.3\",  \"AppPrior\": {\"DomainGoal\": null, \"AttentionDateTime\": 1486748606658}, \"SemanticAnalysisResults\": [{\"SpeechRecogResult\": \"list cards to do\", \"DomainGoal\": \"OUT_OF_DOMAIN-OUT_OF_GOAL\", \"Score\": 1.0, \"SlotSets\": []}]}"}  }
+
+- move card get ticket to list in progress
+{"args":  {"domain_goal":"OUT_OF_DOMAIN-OUT_OF_GOAL","recognitionSetString":"{\"Version\": \"1.1.3\",  \"AppPrior\": {\"DomainGoal\": null, \"AttentionDateTime\": 1486748606658}, \"SemanticAnalysisResults\": [{\"SpeechRecogResult\": \"move card get ticket to list in progress\", \"DomainGoal\": \"OUT_OF_DOMAIN-OUT_OF_GOAL\", \"Score\": 1.0, \"SlotSets\": []}]}"}  }
+
+- add comment to get ticket
+{"args":  {"domain_goal":"OUT_OF_DOMAIN-OUT_OF_GOAL","recognitionSetString":"{\"Version\": \"1.1.3\",  \"AppPrior\": {\"DomainGoal\": null, \"AttentionDateTime\": 1486748606658}, \"SemanticAnalysisResults\": [{\"SpeechRecogResult\": \"add comment to get ticket\", \"DomainGoal\": \"OUT_OF_DOMAIN-OUT_OF_GOAL\", \"Score\": 1.0, \"SlotSets\": []}]}"}  }
+
+    - ["location", "closed", "today", "come", "back", "tomorrow"]
 */
 
 var speechText, boards, command, lists;
-var keyToken = 'key='+ CONFIG.appKey +'&token=' + CONFIG.appToken;
+var keyToken = 'key=' + CONFIG.appKey + '&token=' + CONFIG.appToken;
 
 function arrayToString(arr, prop) {
     var str = '';
@@ -42,13 +54,13 @@ function arrayToString(arr, prop) {
     return str;
 }
 
-function getItemFromStorage(key){
+function getItemFromStorage(key) {
     var Storage = new da.Storage();
     return JSON.parse(Storage.getItem(key));
 }
 
-function getBoardIdByName(name){
-    return boards.find(function(board){
+function getBoardIdByName(name) {
+    return boards.find(function(board) {
         return board.name.toLowerCase() === name.toLowerCase();
     });
 }
@@ -57,7 +69,7 @@ function setBoard() {
     var boardName = command.split('set board to ')[1];
     var boardId = getBoardIdByName(boardName).id;
     var Storage = new da.Storage();
-    Storage.setItem('board', JSON.stringify({name: boardName, id: boardId}));
+    Storage.setItem('board', JSON.stringify({ name: boardName, id: boardId }));
 }
 
 function startSegment() {
@@ -71,7 +83,7 @@ function startSegment() {
 function getAllBoards() {
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/member/me/boards?'+ keyToken,
+        url: 'https://api.trello.com/1/member/me/boards?' + keyToken,
         xhr: function() { return da.getXhr(); },
         success: function(data) {
             boards = data;
@@ -103,7 +115,7 @@ function speakAllBoards() {
     });
 }
 
-function confirmSetBoard(){
+function confirmSetBoard() {
     var synthesis = da.SpeechSynthesis.getInstance();
     var Storage = new da.Storage();
     var currentBoard = getItemFromStorage('board');
@@ -122,11 +134,11 @@ function confirmSetBoard(){
     });
 }
 
-function getListsFromBoard(){
+function getListsFromBoard() {
     var currentBoard = getItemFromStorage('board');
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/boards/'+ currentBoard.id +'/lists?cards=open&card_fields=name&fields=name&'+ keyToken,
+        url: 'https://api.trello.com/1/boards/' + currentBoard.id + '/lists?cards=open&card_fields=name&fields=name&' + keyToken,
         xhr: function() { return da.getXhr(); },
         success: function(data) {
             lists = data;
@@ -139,13 +151,13 @@ function getListsFromBoard(){
     return deferred.promise();
 }
 
-function getListsByName(name){
-    return lists.find(function(list){
+function getListsByName(name) {
+    return lists.find(function(list) {
         return list.name.toLowerCase() === name.toLowerCase();
     });
 }
 
-function speakCardsInList(){
+function speakCardsInList() {
     var listName = command.split('list cards ')[1];
     var cards = arrayToString(getListsByName(listName).cards, 'name');
     var synthesis = da.SpeechSynthesis.getInstance();
@@ -165,7 +177,7 @@ function speakCardsInList(){
     });
 }
 
-function confirmCardMoved(cardName, listName){
+function confirmCardMoved(cardName, listName) {
     var synthesis = da.SpeechSynthesis.getInstance();
     // API_LEVEL = 2 or later;
     synthesis.speak('card ' + cardName + ' has been moved to ' + listName, {
@@ -211,7 +223,7 @@ function getCardByName(name){
     }
 }
 
-function moveCard(){
+function moveCard() {
     var cardList = command.split('move card ')[1].split(' to list ');
     var cardName = cardList[0];
     var listName = cardList[1];
@@ -219,7 +231,7 @@ function moveCard(){
     var cardId = getCardByName(cardName).id;
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/cards/'+ cardId +'?idList='+ listId +'&'+ keyToken,
+        url: 'https://api.trello.com/1/cards/' + cardId + '?idList=' + listId + '&' + keyToken,
         xhr: function() { return da.getXhr(); },
         method: 'PUT',
         success: function(data) {
@@ -232,13 +244,39 @@ function moveCard(){
     return deferred.promise();
 }
 
+function askUserForComment(){
+    //["Need", "to", "come", "back", "tomorrow"]
+    var deferred = jQuery.Deferred();
+    var synthesis = da.SpeechSynthesis.getInstance();
+    var cardName = command.split('add comment to ')[1];
+    synthesis.speak('Specify your comment for card ' + cardName, {
+        onstart: function () {
+            console.log('[SpeechToText] speak start');
+        },
+        onend: function () {
+            console.log('[SpeechToText] speak onend');
 
-function addCommentToCard() {
-    var commentCommand = command.split('add comment ')[1].split(' to card ');
-    var comment = commentCommand[0];
-    var cardName = commentCommand[1];
+            var speechToText = new da.SpeechToText();
+            speechToText.startSpeechToText({
+                onsuccess: function(results){
+                    var comment = results.join(" ");
+                    deferred.resolve(comment, cardName);
+                },
+                onerror: function(error){
+
+                }
+            });
+        },
+        onerror: function (error) {
+            console.log('[SpeechToText] speak cancel: ' + error.message);
+            da.stopSegment();
+        }
+    });
+    return deferred.promise();
+}
+
+function addCommentToCard(comment, cardName) {
     var cardId = getCardByName(cardName).id;
-    var listName = cardList[1];
     var deferred = jQuery.Deferred();
     
     $.ajax({
@@ -252,6 +290,8 @@ function addCommentToCard() {
 
         }
     })
+
+    return deferred.promise();
 
 }
 /**
@@ -284,6 +324,11 @@ da.segment.onpreprocess = function(trigger, args) {
                 startSegment();
             });
             break;
+        case command.indexOf('add comment to') !== -1:
+            $.when(getListsFromBoard()).then(function() {
+                startSegment();
+            });
+            break;
     }
 };
 
@@ -311,27 +356,40 @@ da.segment.onstart = function(trigger, args) {
             }
         });
     } else {
-        switch (true) {
-        case command === 'list all boards':
-            speakAllBoards();
-            break;
-        case command.indexOf('set board to') !== -1:
-            setBoard();
-            confirmSetBoard();
-            break;
-        case command.indexOf('list cards') !== -1:
-            speakCardsInList();
-            break;
-        case command.indexOf('move card') !== -1:
-            $.when(moveCard()).then(function(cardName, listName){
-              confirmCardMoved(cardName, listName);  
-            });        
-            break;
-        case command.indexOf('add comment') !== -1:
-            $.when(addCommentToCard()).then(function(comment, cardName){
-                confirmCommentAdded(comment, cardName);
-            });
-            break;        
-        }
+        synthesis.speak(command, {
+            onstart: function() {
+                console.log('[SpeechToText] speak start');
+            },
+            onend: function() {
+                switch (true) {
+                    case command === 'list all boards':
+                        speakAllBoards();
+                        break;
+                    case command.indexOf('set board to') !== -1:
+                        setBoard();
+                        confirmSetBoard();
+                        break;
+                    case command.indexOf('list cards') !== -1:
+                        speakCardsInList();
+                        break;
+                    case command.indexOf('move card') !== -1:
+                        $.when(moveCard()).then(function(cardName, listName) {
+                            confirmCardMoved(cardName, listName);
+                        });
+                        break;
+                    case command.indexOf('add comment to') !== -1:
+                        $.when(askUserForComment()).then(function(comment, cardName){
+                            $.when(addCommentToCard(comment, cardName)).then(function(){
+                                confirmCommentAdded(comment, cardName);
+                            })
+                        });
+                        break;    
+                }
+            },
+            onerror: function(error) {
+                console.log('[SpeechToText] speak cancel: ' + error.message);
+                da.stopSegment();
+            }
+        });
     }
 };

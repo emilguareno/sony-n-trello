@@ -9,7 +9,8 @@
         "list all boards",
         "set board to .*",
         "list cards .*",
-        "move card .*"
+        "move card .*",
+        "add comment to .*"
       ]
     }
   ]
