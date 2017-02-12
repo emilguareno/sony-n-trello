@@ -1,0 +1,9 @@
+{
+  "defaultValues": {
+    "scope": "com.soy.trello",
+    "version": "1.0",
+    "settings": {
+      "oauth": false
+    }
+  }
+}

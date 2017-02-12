@@ -1,0 +1,16 @@
+{
+  "voicePattern": [
+    {
+      "domain": "CUSTOMAPP",
+      "name": [
+        "trello"
+      ],
+      "phrase": [
+        "list all boards",
+        "set board to .*",
+        "list cards .*",
+        "set card .*"
+      ]
+    }
+  ]
+}

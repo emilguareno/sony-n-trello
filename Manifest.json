@@ -1,0 +1,11 @@
+{
+  "package": "com.soy.trello",
+  "manifestVersion": 1,
+  "name": "Trello",
+  "author": {
+    "name": "Emil Guareno"
+  },
+  "version": 1,
+  "versionName": "1.0.14",
+  "description": "Trello Integration"
+}
