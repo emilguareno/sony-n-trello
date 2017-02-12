@@ -23,7 +23,16 @@
  * SUCH DAMAGE.
  */
 
+/*
+COMMANDS EXAMPLES
+- move card buy bus ticket to list in progress
+- list all boards
+- list cards to do
+- set board to errands
+*/
+
 var speechText, boards, command, lists;
+var keyToken = 'key='+ CONFIG.appKey +'&token=' + CONFIG.appToken;
 
 function arrayToString(arr, prop) {
     var str = '';
@@ -62,7 +71,7 @@ function startSegment() {
 function getAllBoards() {
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/member/me/boards?key=***REMOVED***&token=***REMOVED***',
+        url: 'https://api.trello.com/1/member/me/boards?'+ keyToken,
         xhr: function() { return da.getXhr(); },
         success: function(data) {
             boards = data;
@@ -117,7 +126,7 @@ function getListsFromBoard(){
     var currentBoard = getItemFromStorage('board');
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/boards/'+ currentBoard.id +'/lists?cards=open&card_fields=name&fields=name&key=***REMOVED***&token=***REMOVED***',
+        url: 'https://api.trello.com/1/boards/'+ currentBoard.id +'/lists?cards=open&card_fields=name&fields=name&'+ keyToken,
         xhr: function() { return da.getXhr(); },
         success: function(data) {
             lists = data;
@@ -192,7 +201,7 @@ function moveCard(){
     var cardId = getCardByName(cardName).id;
     var deferred = jQuery.Deferred();
     $.ajax({
-        url: 'https://api.trello.com/1/cards/'+ cardId +'?idList='+ listId +'&key=***REMOVED***&token=***REMOVED***',
+        url: 'https://api.trello.com/1/cards/'+ cardId +'?idList='+ listId +'&'+ keyToken,
         xhr: function() { return da.getXhr(); },
         method: 'PUT',
         success: function(data) {

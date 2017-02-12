@@ -45,3 +45,4 @@ fabric.properties
 /build/
 /.idea/
 
+app/config.js
