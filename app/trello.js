@@ -183,6 +183,24 @@ function confirmCardMoved(cardName, listName){
     });
 }
 
+function confirmCommentAdded(comment, cardName){
+    var synthesis = da.SpeechSynthesis.getInstance();
+    // API_LEVEL = 2 or later;
+    synthesis.speak('comment ' + comment + ' has been added to ' + cardName, {
+        onstart: function() {
+            console.log('[SpeechToText] speak start');
+        },
+        onend: function() {
+            console.log('[SpeechToText] speak onend');
+            da.stopSegment();
+        },
+        onerror: function(error) {
+            console.log('[SpeechToText] speak cancel: ' + error.message);
+            da.stopSegment();
+        }
+    });
+}
+
 function getCardByName(name){
     for(var i = 0; i < lists.length; i++){
         for(var j = 0; j < lists[i].cards.length; j++){
@@ -214,6 +232,28 @@ function moveCard(){
     return deferred.promise();
 }
 
+
+function addCommentToCard() {
+    var commentCommand = command.split('add comment ')[1].split(' to card ');
+    var comment = commentCommand[0];
+    var cardName = commentCommand[1];
+    var cardId = getCardByName(cardName).id;
+    var listName = cardList[1];
+    var deferred = jQuery.Deferred();
+    
+    $.ajax({
+        url: 'https://api.trello.com/1/cards/'+ cardId +'/actions/comments?text='+comment+ '&' + keyToken,
+        xhr: function() { return da.getXhr(); },
+        method: 'POST',
+        success: function(data) {
+            deferred.resolve(comment, cardName);
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+
+        }
+    })
+
+}
 /**
  * The callback to prepare a segment for play.
  * @param  {string} trigger The trigger type of a segment.
@@ -285,8 +325,13 @@ da.segment.onstart = function(trigger, args) {
         case command.indexOf('move card') !== -1:
             $.when(moveCard()).then(function(cardName, listName){
               confirmCardMoved(cardName, listName);  
-            });
+            });        
             break;
+        case command.indexOf('add comment') !== -1:
+            $.when(addCommentToCard()).then(function(comment, cardName){
+                confirmCommentAdded(comment, cardName);
+            });
+            break;        
         }
     }
 };
