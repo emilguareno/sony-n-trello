@@ -310,7 +310,6 @@ da.segment.onpreprocess = function(trigger, args) {
             break;
         case command.indexOf('set board to') !== -1:
             $.when(getAllBoards()).then(function() {
-                setBoard();
                 startSegment();
             });
             break;
