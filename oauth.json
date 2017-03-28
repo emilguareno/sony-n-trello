@@ -3,8 +3,8 @@
   "settings": [
     { "id" : 0,
       "provider" : "trello",
-      "clientId" : "",
-      "clientSecret" : "",
+      "clientId" : "###YOU MUST INPUT###",
+      "clientSecret" : "###YOU MUST INPUT###",
       "options" : {
         "app_name": "trello segment",
         "scope": "read,write,account",
