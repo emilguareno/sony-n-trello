@@ -44,7 +44,10 @@ COMMANDS EXAMPLES
 */
 
 var speechText, boards, command, lists;
-var keyToken = 'key=' + CONFIG.appKey + '&token=' + CONFIG.appToken;
+//var keyToken = 'key=' + CONFIG.appKey + '&token=' + CONFIG.appToken;
+var keyToken;
+
+var oauthToken;
 
 function arrayToString(arr, prop) {
     var str = '';
@@ -278,7 +281,7 @@ function askUserForComment(){
 function addCommentToCard(comment, cardName) {
     var cardId = getCardByName(cardName).id;
     var deferred = jQuery.Deferred();
-    
+
     $.ajax({
         url: 'https://api.trello.com/1/cards/'+ cardId +'/actions/comments?text='+comment+ '&' + keyToken,
         xhr: function() { return da.getXhr(); },
@@ -299,36 +302,83 @@ function addCommentToCard(comment, cardName) {
  * @param  {string} trigger The trigger type of a segment.
  * @param  {object} args    The input arguments.
  */
-da.segment.onpreprocess = function(trigger, args) {
-    console.log('[SpeechToText] onpreprocess', { trigger: trigger, args: args });
-    command = JSON.parse(args.recognitionSetString).SemanticAnalysisResults[0].SpeechRecogResult;
-    switch (true) {
-        case command === 'list all boards':
-            $.when(getAllBoards()).then(function() {
-                startSegment();
+da.segment.onpreprocess = function (trigger, args) {
+    console.log('[SpeechToText] onpreprocess', {trigger: trigger, args: args});
+
+    var oAuthCallBack = {
+        onsuccess: function (token) {
+            console.log('>>>>>>>> onsuccess');
+            console.log(token);
+            var tokenObject = JSON.parse(token);
+            if (tokenObject) {
+                console.log('>>>>>>>> onsuccess:token');
+                if (tokenObject.credentials) {
+                    console.log('>>>>>>>> onsuccess:token.credentials');
+                    if (tokenObject.credentials.token) {
+                        console.log('>>>>>>>> onsuccess:token.credentials.token');
+                        oauthToken = tokenObject.credentials.token;
+                        console.log('oauthToken=' + oauthToken);
+                    } else {
+                        console.log('>>>>>>>> onsuccess:token.credentials.token fail');
+                    }
+                } else {
+                    console.log('>>>>>>>> onsuccess:token.credentials fail');
+                }
+            } else {
+                console.log('>>>>>>>> onsuccess:token fail');
+            }
+            console.log('<<<<<<<< onsuccess:token');
+
+            keyToken = 'key=' + CONFIG.appKey + '&token=' + oauthToken;
+
+            command = JSON.parse(args.recognitionSetString).SemanticAnalysisResults[0].SpeechRecogResult;
+            switch (true) {
+                case command === 'list all boards':
+                    $.when(getAllBoards()).then(function () {
+                        startSegment();
+                    });
+                    break;
+                case command.indexOf('set board to') !== -1:
+                    $.when(getAllBoards()).then(function () {
+                        startSegment();
+                    });
+                    break;
+                case command.indexOf('list cards') !== -1:
+                    $.when(getListsFromBoard()).then(function () {
+                        startSegment();
+                    });
+                    break;
+                case command.indexOf('move card') !== -1:
+                    $.when(getListsFromBoard()).then(function () {
+                        startSegment();
+                    });
+                    break;
+                case command.indexOf('add comment to') !== -1:
+                    $.when(getListsFromBoard()).then(function () {
+                        startSegment();
+                    });
+                    break;
+                default:
+                    $.when(getAllBoards()).then(function () {
+                        startSegment();
+                    });
+                    break;
+            }
+
+            console.log('<<<<<<<< onsuccess');
+        },
+        onerror: function (error) {
+            console.log('>>>>>>>> onerror');
+            console.log('getToken error[' + error.code + ']:' + error.message);
+            da.startSegment(trigger, {
+                args: {
+                    type: "error"
+                }
             });
-            break;
-        case command.indexOf('set board to') !== -1:
-            $.when(getAllBoards()).then(function() {
-                startSegment();
-            });
-            break;
-        case command.indexOf('list cards') !== -1:
-            $.when(getListsFromBoard()).then(function() {
-                startSegment();
-            });
-            break;
-        case command.indexOf('move card') !== -1:
-            $.when(getListsFromBoard()).then(function() {
-                startSegment();
-            });
-            break;
-        case command.indexOf('add comment to') !== -1:
-            $.when(getListsFromBoard()).then(function() {
-                startSegment();
-            });
-            break;
-    }
+            console.log('<<<<<<<< onerror');
+        }
+    };
+    da.getOAuthAccessToken(0, oAuthCallBack, false);
 };
 
 /**
@@ -340,6 +390,24 @@ da.segment.onpreprocess = function(trigger, args) {
 da.segment.onstart = function(trigger, args) {
     console.log('[SpeechToText] onstart', { trigger: trigger, args: args });
     var synthesis = da.SpeechSynthesis.getInstance();
+
+    if (args) {
+        if (args.type === "error") {
+            synthesis.speak('Fail to get token', {
+                onstart: function() {
+                    console.log('[SpeechToText] speak start');
+                },
+                onend: function() {
+                    da.stopSegment();
+                    return;
+                },
+                onerror: function(error) {
+                    da.stopSegment();
+                    return;
+                }
+            });
+        }
+    }
 
     if (da.getApiLevel === undefined) {
         // API_LEVEL = 1;
@@ -382,7 +450,10 @@ da.segment.onstart = function(trigger, args) {
                                 confirmCommentAdded(comment, cardName);
                             })
                         });
-                        break;    
+                        break;
+                    default:
+                        speakAllBoards();
+                        break;
                 }
             },
             onerror: function(error) {
