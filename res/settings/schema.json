@@ -7,6 +7,12 @@
         "key": "description",
         "displayName": "Test segment for Speech To Text API",
         "layout": "description"
+      },
+      {
+        "key": "oauth",
+        "displayName": "Account Setting",
+        "layout": "button",
+        "oauthId": 0
       }
     ]
   }

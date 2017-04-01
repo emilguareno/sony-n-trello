@@ -1,0 +1,16 @@
+{
+  "version": "1.0",
+  "settings": [
+    { "id" : 0,
+      "provider" : "trello",
+      "clientId" : "###YOU MUST INPUT###",
+      "clientSecret" : "###YOU MUST INPUT###",
+      "options" : {
+        "app_name": "trello segment",
+        "scope": "read,write,account",
+        "expiration" : "never"
+      }
+    }
+  ]
+}
+
