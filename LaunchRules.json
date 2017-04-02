@@ -6,6 +6,7 @@
         "trello"
       ],
       "phrase": [
+        ".*",
         "list all boards",
         "set board to .*",
         "list cards .*",

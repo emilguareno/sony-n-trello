@@ -5,8 +5,14 @@
     "settings": [
       {
         "key": "description",
-        "displayName": "Test segment for Speech To Text API",
+        "displayName": "Connect to Trello and manage your tasks. \n\n <Voice Command> \n - List all boards \n - Set board to <board name> \n - List cards <list name> \n - Move card <card name> to list <list name> \n - Add comment to <card name> \n\n <Contact Us> \n http://arcticloop.com/ ",
         "layout": "description"
+      },
+      {
+        "key": "oauth",
+        "displayName": "Account Setting",
+        "layout": "button",
+        "oauthId": 0
       }
     ]
   }

@@ -1,4 +1,3 @@
 var CONFIG = {
-    appKey: 'APP_KEY',
-    appToken: 'APP_TOKEN'
+    appKey: 'APP_KEY'
 };

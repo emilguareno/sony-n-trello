@@ -46,3 +46,4 @@ fabric.properties
 /.idea/
 
 app/config.js
+oauth.json
